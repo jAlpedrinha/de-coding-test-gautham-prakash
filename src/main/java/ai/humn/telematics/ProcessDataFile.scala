@@ -2,57 +2,161 @@ package ai.humn.telematics
 
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
 object ProcessDataFile {
 
-  def main(args: Array[String]) = {
+  def getData(filePath:String):List[Array[String]]={
 
-    // read file path from args
-    var x = args(0)
-
-    // This is the file
-    val y = Source.fromFile(x)
-
+    val fileContent = Source.fromFile(filePath)
+    
     // All of the lines in the file
-    var l: Seq[String] = y.getLines().toList
+    val lines: Seq[String] = fileContent.getLines().toList
+
+    // Close the file source
+    fileContent.close()
 
     // Make a variable to hold the parsed lines from the file.
-    var results = ListBuffer[ Array[String] ]()
+    var results = ListBuffer[ Array[String]]()
 
     // parse each line as csv to a collection
-    for (a <- 0 until l.length) {
-          results += l(a).split(",")
+    for (line <- lines) {
+      results += line.split(",")
     }
 
     // This is a collection of the journey lines
-    val j = results.toList
+    val journey = results.toList
+    val j = journey.distinct
 
-    // 1. Find journeys that are 90 minutes or more.
-    println("Journeys of 90 minutes or more.")
-    var i = 0
+    //Return List containing file Data.
+    j
+  }
+
+  // Function to find the distance of a trip.
+  def distance(start:Double, end:Double): Double = {
+    var result = end - start
+    result
+  }
+
+  // Function to find the duration of a trip.
+  def duration(start:Long, end:Long): Long = {
+    var result = end - start
+    result
+  }
+
+  // Function to find the average speed of a trip.
+  def avgSpeed(distance:Double, duration:Double): Double = {
+    var result = distance / (duration / 1000.0 / 3600.0)
+    result
+  }
+
+  // Function to find journeys that are 90 minutes or more.
+  def journey90(j:List[Array[String]]): Unit = {
+
+    var i = 1;
     var ok = true
     while(ok){
-      if( j(i)(2).toLong - j(i)(3).toLong >= 90 * 1000 * 60 ){
-        println("This journey took longer than 90 minutes")
-        println(j(i).mkString(","))
+      var dura = duration(j(i)(2).toLong, j(i)(3).toLong)
+      if( dura >= (90 * 1000 * 60) ){
+        var dist = distance(j(i)(8).toDouble, j(i)(9).toDouble)
+        if(dist > 0.0){
+          var avgS = avgSpeed(dist, dura)
+          println(s"JourneyId: ${j(i)(0)} ${j(i)(1)} distance ${dist} durationMS ${dura} avgSpeed in kph was ${avgS}")
+          //i = i + 1
+        }
       }
+      i = i + 1
+      if( i >= j.size ){
+        ok = false
+      }
+    }
+  }
+
+  // Function to find the average speed per journey in kph.
+  def avgSpeedPerJourney(j:List[Array[String]]): Unit = {
+
+    val journeyBuffer = ArrayBuffer[String]()
+    var i = 1
+    var ok = true
+    while(ok){
+      if(!journeyBuffer.exists(_==j(i)(0))){
+        journeyBuffer += j(i)(0)
+        var dist = distance(j(i)(8).toDouble, j(i)(9).toDouble)
+        var dura = duration(j(i)(2).toLong, j(i)(3).toLong)
+        if(dist > 0.0 && dura > 0.0){
+          var avgS = avgSpeed(dist, dura)
+          println(s"JourneyId: ${j(i)(0)} ${j(i)(1)} distance ${dist} durationMS ${dura} avgSpeed in kph was ${avgS}")
+        }
+      }
+      i = i + 1
+      if( i > 9 ) ok = false
+    }
+  }
+
+  // Function to find mileage per driver and most active driver. 
+  def mileageByDriver(j:List[Array[String]]): Unit = {
+    
+    val journeyBuffer = ArrayBuffer[String]()
+    var i = 1
+    var ok = true
+    var highest = 0
+    var mostActiveDriver = ""
+    var temp = ""
+    var total = 0
+    val mileageTotal = mutable.Map.empty[String, Int]
+    while(ok){
+      if(!journeyBuffer.exists(_==j(i)(0))){
+        journeyBuffer += j(i)(0) 
+        var dist = distance(j(i)(8).toDouble, j(i)(9).toDouble)
+        var dura = duration(j(i)(2).toLong, j(i)(3).toLong)
+        if(dist > 0.0 && dura > 0.0){
+          if(temp != j(i)(1)){
+            total = 0
+            total = total + dist.toInt
+            mileageTotal.put(j(i)(1), total)
+          }else{
+            total = total + dist.toInt
+            mileageTotal(j(i)(1)) = total
+          }
+          if(total > highest ){
+            highest = total.toInt
+            mostActiveDriver = j(i)(1)
+          }
+        }
+        temp = j(i)(1)
+      } 
       i = i + 1
       if( i >= j.size ) ok = false
     }
 
-    // need to do the
-    // 2. Find the average speed per journey in kph.
-
-    // her eis where I will
-    // 3. Find the total mileage by driver for the whole day.
-
-    // This part is the last part of the puzzle
-    // This jira was a little bit unclear.
-    // I assume that most active driver means the driver who drove the most mileage
-    // for all of the journeys.
-    // we somehow need to
+    mileageTotal.foreach { case (key, value) =>
+      println(s"$key drove ${value} kilometers")
+    }
+    println()
     // 4. Find the most active driver - the driver who has driven the most kilometers.
+    println(s"Most active driver is ${mostActiveDriver}")
+  }
 
+  def main(args: Array[String]): Unit = {
+
+    val filePath = "/Users/gautham/Interview assessment/AON/de-coding-test-gautham-prakash/src/test/resources/2021-10-05_journeys.csv"
+    val j = getData(filePath)
+    
+    // 1. Find journeys that are 90 minutes or more. 
+    println("Journeys of 90 minutes or more.")
+    journey90(j)
+    println();
+
+    // 2. Find the average speed per journey in kph.
+    println("Average speed in Kph")
+    avgSpeedPerJourney(j)
+    println();
+
+    //3. Find the total mileage by driver for the whole day and most active driver.
+    println("Mileage By Driver")
+    mileageByDriver(j)
   }
 
 }
