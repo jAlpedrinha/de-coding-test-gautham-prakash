@@ -36,9 +36,9 @@ object ProcessDataFile {
   }
 
   // Function to find the duration of a trip.
-  def duration(start:Long, end:Long): Long = {
+  def duration(start:Double, end:Double): Long = {
     var result = end - start
-    result
+    result.toLong
   }
 
   // Function to find the average speed of a trip.
@@ -136,7 +136,7 @@ object ProcessDataFile {
 
   def main(args: Array[String]): Unit = {
 
-    val filePath = "/Users/gautham/Interview assessment/AON/de-coding-test-gautham-prakash/src/test/resources/2021-10-05_journeys.csv"
+    val filePath = "/Users/gautham/Interview assessment/AON/de-coding-test-gautham-prakash/src/test/resources/2021-10-05_journeys.csv" // Replace this file path with the CSV file path in your repo.
     val j = getData(filePath)
     
     // 1. Find journeys that are 90 minutes or more. 
