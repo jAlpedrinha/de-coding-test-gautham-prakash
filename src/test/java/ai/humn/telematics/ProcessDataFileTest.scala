@@ -3,7 +3,6 @@ package ai.humn.telematics
 import java.io.{ByteArrayOutputStream, PrintStream}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
-//import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import ai.humn.telematics.ProcessDataFile.distance
 
@@ -13,7 +12,6 @@ class ProcessDataFileTest extends FlatSpec with Matchers {
   val testFilePath = this.getClass.getClassLoader.getResource("2021-10-05_journeys.csv")
 
   behavior of "TestSuit"
-  // This test is failing but I don't know why :(
   it should "generate results to stdout" in {
     //println(testFilePath.getPath())
     ProcessDataFile.main(Array(testFilePath.getPath))
