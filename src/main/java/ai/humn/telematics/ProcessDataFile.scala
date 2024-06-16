@@ -11,26 +11,21 @@ object ProcessDataFile {
   def getData(filePath:String):List[Array[String]]={
 
     val fileContent = Source.fromFile(filePath)
-    
-    // All of the lines in the file
+
     val lines: Seq[String] = fileContent.getLines().toList
 
-    // Close the file source
     fileContent.close()
 
-    // Make a variable to hold the parsed lines from the file.
     var results = ListBuffer[ Array[String]]()
 
-    // parse each line as csv to a collection
+    // Parse each line as csv to a collection
     for (line <- lines) {
       results += line.split(",")
     }
 
-    // This is a collection of the journey lines
     val journey = results.toList
     val j = journey.distinct
 
-    //Return List containing file Data.
     j
   }
 
