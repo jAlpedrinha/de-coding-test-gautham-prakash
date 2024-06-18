@@ -136,22 +136,42 @@ object ProcessDataFile {
 
   def main(args: Array[String]): Unit = {
 
+    // // read file path from args
+    // var x = args(0)
+
+    // // This is the file
+    // val y = Source.fromFile(x)
+
+    // // All of the lines in the file
+    // var l: Seq[String] = y.getLines().toList
+
+    // // Make a variable to hold the parsed lines from the file.
+    // var results = ListBuffer[ Array[String] ]()
+
+    // // parse each line as csv to a collection
+    // for (a <- 0 until l.length) {
+    //       results += l(a).split(",")
+    // }
+
+    // // This is a collection of the journey lines
+    // val journeyData = results.toList
+
     val filePath = "/Users/gautham/Interview assessment/AON/de-coding-test-gautham-prakash/src/test/resources/2021-10-05_journeys.csv" // Replace this file path with the CSV file path in your repo.
-    val j = getData(filePath)
+    val journeyData = getData(filePath)
     
     // 1. Find journeys that are 90 minutes or more. 
     println("Journeys of 90 minutes or more.")
-    journey90(j)
+    journey90(journeyData)
     println();
 
     // 2. Find the average speed per journey in kph.
     println("Average speed in Kph")
-    avgSpeedPerJourney(j)
+    avgSpeedPerJourney(journeyData)
     println();
 
     //3. Find the total mileage by driver for the whole day and most active driver.
     println("Mileage By Driver")
-    mileageByDriver(j)
+    mileageByDriver(journeyData)
   }
 
 }
